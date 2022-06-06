@@ -9,6 +9,7 @@
         >
           <button class="btn btn-secondary" @click="add">Add</button>
           <button class="btn btn-secondary" @click="replace">Replace</button>
+          <button @click="reverse">Reverse</button>
         </div>
 
         <div class="form-check">
@@ -35,11 +36,29 @@
         :move="checkMove"
         @start="dragging = true"
         @end="dragging = false"
+        handle=".handle-only-this"
+        animation="200"
       >
+        <template #header>
+          <input type="time" v-model="firstElement.content" />
+        </template>
         <template #item="{ element }">
-          <div class="list-group-item" :class="{ 'not-draggable': !enabled }">
-            {{ element.name }}
+          <div v-if="element.id !== 0 && element.id !== lastElement.id">
+            <textarea
+              v-if="element.draggable"
+              v-model="element.content"
+              placeholder="Write your action"
+            ></textarea>
+            <input
+              type="time"
+              v-if="!element.draggable"
+              v-model="element.content"
+            />
+            <span v-if="element.draggable" class="handle-only-this">D</span>
           </div>
+        </template>
+        <template #footer>
+          <input type="time" v-model="lastElement.content" />
         </template>
       </draggable>
     </div>
@@ -49,7 +68,9 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import draggable from "vuedraggable";
+
 let id = 1;
 export default {
   name: "TimeTable",
@@ -62,9 +83,9 @@ export default {
     return {
       enabled: true,
       list: [
-        { name: "John", id: 0 },
-        { name: "Joao", id: 1 },
-        { name: "Jean", id: 2 },
+        { id: 0, content: "09:15", draggable: false },
+        { id: 1, content: "", draggable: true },
+        { id: 2, content: "17:45", draggable: false },
       ],
       dragging: false,
     };
@@ -73,10 +94,19 @@ export default {
     draggingInfo() {
       return this.dragging ? "under drag" : "";
     },
+    firstElement() {
+      return this.list[0];
+    },
+    lastElement() {
+      return this.list[this.list.length - 1];
+    },
   },
   methods: {
     add: function () {
-      this.list.push({ name: "Juan " + id, id: id++ });
+      const lastID = this.list.length - 1;
+      const lastTime = this.list[lastID].content;
+      this.list.push({ id: lastID + 1, content: "", draggable: true });
+      this.list.push({ id: lastID + 2, content: lastTime, draggable: false });
     },
     replace: function () {
       this.list = [{ name: "Edgard", id: id++ }];
@@ -84,20 +114,9 @@ export default {
     checkMove: function (e) {
       window.console.log("Future index: " + e.draggedContext.futureIndex);
     },
+    reverse: function () {
+      this.list.reverse();
+    },
   },
 };
 </script>
-<style scoped>
-.buttons {
-  margin-top: 35px;
-}
-
-.ghost {
-  opacity: 0.5;
-  background: #c8ebfb;
-}
-
-.not-draggable {
-  cursor: no-drop;
-}
-</style>
