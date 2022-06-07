@@ -34,8 +34,9 @@
         :move="checkMove"
         @start="dragging = true"
         @end="dragging = false"
+        @change="ai"
         handle=".handle-only-this"
-        animation="200"
+        animation="350"
       >
         <template #item="{ element }">
           <div>
@@ -104,6 +105,14 @@ export default {
     },
     checkMove: function (e) {
       //window.console.log("Future index: " + e.draggedContext.futureIndex);
+    },
+    a: function (message) {
+      //デバッグ用の関数
+      alert(message);
+    },
+    ai: function (item) {
+      //デバッグ用の関数
+      alert(item.moved.element.text);
     },
   },
 };
