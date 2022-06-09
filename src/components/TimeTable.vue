@@ -1,64 +1,56 @@
 <template>
-  <div style="border: solid">
-    <br />
-    <br />
-    <br />
-  </div>
-
-  <div class="row">
-    <div class="col-2">
-      <div class="form-group">
-        <div
-          class="btn-group-vertical buttons"
-          role="group"
-          aria-label="Basic example"
-        >
-          <button class="btn btn-secondary" @click="add">Add</button>
-        </div>
-
-        <div class="form-check">
-          <input
-            id="disabled"
-            type="checkbox"
-            v-model="enabled"
-            class="form-check-input"
-          />
-          <label class="form-check-label" for="disabled">DnD enabled</label>
-        </div>
+  <draggable
+    :list="emptyList"
+    :disabled="!enabled"
+    item-key="id"
+    @change="modifyTimeWhenMoved"
+    handle=".handle-only-this"
+    animation="350"
+    group="day"
+    style="border: solid; height: 57px"
+    id="deleteArea"
+  >
+    <template #item="{ element }">
+      <div>
+        {{ element }}
       </div>
-    </div>
+    </template>
+  </draggable>
 
-    <div v-for="day in newTimeTable" :key="day.id">
-      {{ day.date }}
-      <draggable
-        :list="day.contents"
-        :disabled="!enabled"
-        :move="checkMove"
-        item-key="name"
-        @change="modifyTimeWhenMoved"
-        handle=".handle-only-this"
-        animation="350"
-        group="day"
-      >
-        <template #item="{ element }">
-          <div>
-            <input type="time" v-model="element.time" />
-            <br />
-            <textarea
-              v-model="element.text"
-              placeholder="Write your action"
-            ></textarea>
-            <span class="handle-only-this">Drag</span>
-          </div>
-        </template>
-      </draggable>
-    </div>
-    <div>
-      <input type="time" v-model="lastTime" />
-    </div>
-
-    <rawDisplayer class="col-3" :value="list" title="List" />
+  <div v-for="day in newTimeTable" :key="day.id">
+    {{ day.date }}
+    <draggable
+      :list="day.contents"
+      :disabled="!enabled"
+      item-key="id"
+      @change="modifyTimeWhenMoved"
+      @start="enableDeleteArea"
+      @end="
+        disableDeleteArea();
+        clearEmptyList();
+      "
+      handle=".handle-only-this"
+      animation="350"
+      group="day"
+    >
+      <template #item="{ element }">
+        <div>
+          <input type="time" v-model="element.time" />
+          <br />
+          <textarea
+            v-model="element.text"
+            placeholder="Write your action"
+          ></textarea>
+          <span class="handle-only-this">Drag</span>
+        </div>
+      </template>
+    </draggable>
   </div>
+  <div>
+    <input type="time" v-model="lastTime" />
+  </div>
+
+  <button class="btn btn-secondary" @click="add">Add</button>
 </template>
 
 <script>
@@ -134,6 +126,7 @@ export default {
         },
       ],
       lastTime: "18:45",
+      emptyList: [],
     };
   },
   computed: {
@@ -149,6 +142,7 @@ export default {
     checkMove: function (e) {
       //alert("Future index: " + e.draggedContext.futureIndex);
       //document.body.style.backgroundColor = "red";
+      document.getElementById("deleteArea").style.backgroundColor = "red";
     },
     a: function (message) {
       //function for debugging
@@ -157,6 +151,15 @@ export default {
     ai: function (item) {
       //function for debugging
       alert(item.moved.newIndex);
+    },
+    enableDeleteArea: function () {
+      document.getElementById("deleteArea").style.backgroundColor = "red";
+    },
+    disableDeleteArea: function () {
+      document.getElementById("deleteArea").style.backgroundColor = "white";
+    },
+    clearEmptyList: function () {
+      this.emptyList = [];
     },
   },
 };
