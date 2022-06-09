@@ -22,21 +22,17 @@
       </div>
     </div>
 
-    <div class="col-6">
-      <h3>Draggable {{ draggingInfo }}</h3>
-
+    <div v-for="day in newTimeTable" :key="day.id">
+      {{ day.date }}
       <draggable
-        :list="timeTable"
+        :list="day.contents"
         :disabled="!enabled"
-        item-key="name"
-        class="list-group"
-        ghost-class="ghost"
         :move="checkMove"
-        @start="dragging = true"
-        @end="dragging = false"
+        item-key="name"
         @change="modifyTimeWhenMoved"
         handle=".handle-only-this"
         animation="350"
+        group="day"
       >
         <template #item="{ element }">
           <div>
@@ -49,10 +45,10 @@
             <span class="handle-only-this">Drag</span>
           </div>
         </template>
-        <template #footer>
-          <input type="time" v-model="lastTime" />
-        </template>
       </draggable>
+    </div>
+    <div>
+      <input type="time" v-model="lastTime" />
     </div>
 
     <rawDisplayer class="col-3" :value="list" title="List" />
@@ -87,11 +83,49 @@ export default {
     return {
       enabled: true,
       dragging: false,
-      timeTable: [
-        { id: 0, time: "09:15", text: "meeting" },
-        { id: 1, time: "12:00", text: "lunch" },
-        { id: 2, time: "13:00", text: "coding" },
-        { id: 3, time: "15:00", text: "meeting" },
+      newTimeTable: [
+        {
+          id: 0,
+          date: "2023-02-01",
+          contents: [
+            {
+              id: 0,
+              time: "09:15",
+              text: "email checkig",
+            },
+            {
+              id: 1,
+              time: "10:00",
+              text: "coding",
+            },
+            {
+              id: 2,
+              time: "12:00",
+              text: "lunch",
+            },
+          ],
+        },
+        {
+          id: 1,
+          date: "2023-02-02",
+          contents: [
+            {
+              id: 3,
+              time: "09:15",
+              text: "email checkig",
+            },
+            {
+              id: 4,
+              time: "10:00",
+              text: "coding",
+            },
+            {
+              id: 5,
+              time: "12:00",
+              text: "lunch",
+            },
+          ],
+        },
       ],
       lastTime: "18:45",
     };
@@ -100,15 +134,6 @@ export default {
     draggingInfo() {
       return this.dragging ? "under drag" : "";
     },
-    lastID() {
-      var maxID = 0;
-      for (const row of this.timeTable) {
-        if (maxID < row.id) {
-          maxID = row.id;
-        }
-      }
-      return maxID;
-    },
   },
   methods: {
     add: function () {
@@ -116,7 +141,8 @@ export default {
       this.timeTable.push(newRow);
     },
     checkMove: function (e) {
-      //window.console.log("Future index: " + e.draggedContext.futureIndex);
+      //alert("Future index: " + e.draggedContext.futureIndex);
+      //document.body.style.backgroundColor = "red";
     },
     a: function (message) {
       //function for debugging
@@ -126,36 +152,6 @@ export default {
       //function for debugging
       alert(item.moved.newIndex);
     },
-    modifyTimeWhenMoved: function (item) {
-      const newIndex = item.moved.newIndex;
-
-      //動かした要素
-      const movedElement = this.timeTable[newIndex];
-
-      var timeAbove = null;
-      if (newIndex === 0) {
-        timeAbove = movedElement.time;
-      } else {
-        timeAbove = this.timeTable[newIndex - 1].time;
-      }
-
-      var timeBelow = null;
-      if (newIndex === this.timeTable.length - 1) {
-        timeBelow = this.lastTime;
-      } else {
-        timeBelow = this.timeTable[newIndex + 1].time;
-      }
-
-      if (
-        !isASameOrBeforeB(timeAbove, movedElement.time) ||
-        !isASameOrBeforeB(movedElement.time, timeBelow)
-      ) {
-        this.timeTable[newIndex].time = timeBelow;
-      }
-    },
-    modifyTimeWhenTimeChanged(){
-      alert("wrong time input")
-    }
   },
 };
 </script>
