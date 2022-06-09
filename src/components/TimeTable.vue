@@ -8,8 +8,6 @@
           aria-label="Basic example"
         >
           <button class="btn btn-secondary" @click="add">Add</button>
-          <button class="btn btn-secondary" @click="replace">Replace</button>
-          <button @click="reverse">Reverse</button>
         </div>
 
         <div class="form-check">
@@ -28,7 +26,7 @@
       <h3>Draggable {{ draggingInfo }}</h3>
 
       <draggable
-        :list="list"
+        :list="timeTable"
         :disabled="!enabled"
         item-key="name"
         class="list-group"
@@ -36,29 +34,23 @@
         :move="checkMove"
         @start="dragging = true"
         @end="dragging = false"
+        @change="modifyTimeWhenMoved"
         handle=".handle-only-this"
-        animation="200"
+        animation="350"
       >
-        <template #header>
-          <input type="time" v-model="firstElement.content" />
-        </template>
         <template #item="{ element }">
-          <div v-if="element.id !== 0 && element.id !== lastElement.id">
+          <div>
+            <input type="time" v-model="element.time" />
+            <br />
             <textarea
-              v-if="element.draggable"
-              v-model="element.content"
+              v-model="element.text"
               placeholder="Write your action"
             ></textarea>
-            <input
-              type="time"
-              v-if="!element.draggable"
-              v-model="element.content"
-            />
-            <span v-if="element.draggable" class="handle-only-this">D</span>
+            <span class="handle-only-this">Drag</span>
           </div>
         </template>
         <template #footer>
-          <input type="time" v-model="lastElement.content" />
+          <input type="time" v-model="lastTime" />
         </template>
       </draggable>
     </div>
@@ -71,6 +63,18 @@
 /* eslint-disable no-console */
 import draggable from "vuedraggable";
 
+function isASameOrBeforeB(a, b) {
+  const hourA = Number(a.substr(0, 2));
+  const hourB = Number(b.substr(0, 2));
+  if (hourA < hourB) return true;
+  if (hourB < hourA) return false;
+
+  const minutesA = Number(a.substr(3, 2));
+  const minutesB = Number(b.substr(3, 2));
+  if (minutesA <= minutesB) return true;
+  return false;
+}
+
 let id = 1;
 export default {
   name: "TimeTable",
@@ -82,41 +86,76 @@ export default {
   data() {
     return {
       enabled: true,
-      list: [
-        { id: 0, content: "09:15", draggable: false },
-        { id: 1, content: "", draggable: true },
-        { id: 2, content: "17:45", draggable: false },
-      ],
       dragging: false,
+      timeTable: [
+        { id: 0, time: "09:15", text: "meeting" },
+        { id: 1, time: "12:00", text: "lunch" },
+        { id: 2, time: "13:00", text: "coding" },
+        { id: 3, time: "15:00", text: "meeting" },
+      ],
+      lastTime: "18:45",
     };
   },
   computed: {
     draggingInfo() {
       return this.dragging ? "under drag" : "";
     },
-    firstElement() {
-      return this.list[0];
-    },
-    lastElement() {
-      return this.list[this.list.length - 1];
+    lastID() {
+      var maxID = 0;
+      for (const row of this.timeTable) {
+        if (maxID < row.id) {
+          maxID = row.id;
+        }
+      }
+      return maxID;
     },
   },
   methods: {
     add: function () {
-      const lastID = this.list.length - 1;
-      const lastTime = this.list[lastID].content;
-      this.list.push({ id: lastID + 1, content: "", draggable: true });
-      this.list.push({ id: lastID + 2, content: lastTime, draggable: false });
-    },
-    replace: function () {
-      this.list = [{ name: "Edgard", id: id++ }];
+      const newRow = { id: this.lastID + 1, time: this.lastTime, text: "" };
+      this.timeTable.push(newRow);
     },
     checkMove: function (e) {
-      window.console.log("Future index: " + e.draggedContext.futureIndex);
+      //window.console.log("Future index: " + e.draggedContext.futureIndex);
     },
-    reverse: function () {
-      this.list.reverse();
+    a: function (message) {
+      //function for debugging
+      alert(message);
     },
+    ai: function (item) {
+      //function for debugging
+      alert(item.moved.newIndex);
+    },
+    modifyTimeWhenMoved: function (item) {
+      const newIndex = item.moved.newIndex;
+
+      //動かした要素
+      const movedElement = this.timeTable[newIndex];
+
+      var timeAbove = null;
+      if (newIndex === 0) {
+        timeAbove = movedElement.time;
+      } else {
+        timeAbove = this.timeTable[newIndex - 1].time;
+      }
+
+      var timeBelow = null;
+      if (newIndex === this.timeTable.length - 1) {
+        timeBelow = this.lastTime;
+      } else {
+        timeBelow = this.timeTable[newIndex + 1].time;
+      }
+
+      if (
+        !isASameOrBeforeB(timeAbove, movedElement.time) ||
+        !isASameOrBeforeB(movedElement.time, timeBelow)
+      ) {
+        this.timeTable[newIndex].time = timeBelow;
+      }
+    },
+    modifyTimeWhenTimeChanged(){
+      alert("wrong time input")
+    }
   },
 };
 </script>
