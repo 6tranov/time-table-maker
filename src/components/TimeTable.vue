@@ -4,7 +4,6 @@
       :list="emptyListOfDeleteArea"
       :disabled="!enabled"
       item-key="id"
-      @change="modifyTimeWhenMoved"
       handle=".handle-only-this"
       animation="350"
       group="day"
@@ -24,7 +23,7 @@
         :list="day.rows"
         :disabled="!enabled"
         item-key="id"
-        @change="modifyTimeWhenMoved"
+        @change="modifyTimeWhenMoved($event, day.id)"
         @start="enableDeleteArea"
         @end="
           disableDeleteArea();
@@ -289,6 +288,53 @@ export default {
       const md = getMDTimeTable(converted);
       navigator.clipboard.writeText(md);
       alert("コピーしました");
+    },
+    modifyTimeWhenMoved(event, dateIndex) {
+      //rowの移動元の配列に対しては、何も行わない。
+      if (typeof event.removed !== "undefined") {
+        return;
+      }
+
+      //rowの移動先の配列に対して、timeの順番の整合性を取る。
+      //dragが行われた後の、dateとrowのIndexを取得する。
+      const newDateIndex = dateIndex;
+      var newRowIndex = null;
+      //同じ日付の中でrowの交換が行われた場合
+      if (typeof event.moved !== "undefined") {
+        newRowIndex = event.moved.newIndex;
+      }
+      //日付間でrowの交換が行われた場合
+      if (typeof event.added !== "undefined") {
+        newRowIndex = event.added.newIndex;
+      }
+
+      //dragされたrowのtimeを、下のtimeに合わせる。
+      this.setSameTimeAsBelow(newDateIndex, newRowIndex);
+    },
+    setSameTimeAsBelow(dateIndex, rowIndex) {
+      //1つ下にrowがあるとき、そのtimeにする。
+      if (rowIndex < this.timeTable[dateIndex].rows.length - 1) {
+        this.timeTable[dateIndex].rows[rowIndex].time =
+          this.timeTable[dateIndex].rows[rowIndex + 1].time;
+        return;
+      }
+
+      //(1番下のrowという前提のもと)1番最後の日付のとき、lastTimeにする。
+      if (dateIndex == this.timeTable.length - 1) {
+        this.timeTable[dateIndex].rows[rowIndex].time = this.lastTime;
+        return;
+      }
+
+      //(1番下の要素で次の日付があるという前提のもと)上のrowがあるとき、そのtimeにする。
+      if (0 < rowIndex) {
+        this.timeTable[dateIndex].rows[rowIndex].time =
+          this.timeTable[dateIndex].rows[rowIndex - 1].time;
+        return;
+      }
+
+      //それ以外の(新しい日付にドラッグした)とき、00:00にする。
+      this.timeTable[dateIndex].rows[rowIndex].time = "00:00";
+      return;
     },
   },
 };
