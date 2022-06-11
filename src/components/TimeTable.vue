@@ -52,7 +52,7 @@
     </div>
 
     <button class="btn btn-secondary" @click="add">Add</button>
-    <button class="btn btn-secondary" @click="copy">Copy</button>
+    <button class="btn btn-secondary" @click="copyToClipboard">Copy</button>
   </div>
 </template>
 
@@ -284,7 +284,7 @@ export default {
     clearEmptyListOfDeleteArea: function () {
       this.emptyListOfDeleteArea = [];
     },
-    copy: function () {
+    copyToClipboard: function () {
       const converted = getConvertedTimeTable(this.timeTable, this.lastTime);
       const md = getMDTimeTable(converted);
       navigator.clipboard.writeText(md);
