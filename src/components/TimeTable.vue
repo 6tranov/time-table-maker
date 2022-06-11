@@ -39,7 +39,7 @@
               type="time"
               v-model="element.time"
               @focus="setOldTime($event.target.value)"
-              @change="
+              @blur="
                 modifyTimeWhenChanged(
                   getDateIndexAndRowIndexPairFromRowID(element.id)
                 )
