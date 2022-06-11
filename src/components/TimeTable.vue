@@ -289,6 +289,7 @@ export default {
       navigator.clipboard.writeText(md);
       alert("コピーしました");
     },
+    //rowを移動したとき、時間の整合性が取れるようにする。
     modifyTimeWhenMoved(event, dateIndex) {
       //rowの移動元の配列に対しては、何も行わない。
       if (typeof event.removed !== "undefined") {
@@ -311,6 +312,7 @@ export default {
       //dragされたrowのtimeを、下のtimeに合わせる。
       this.setSameTimeAsBelow(newDateIndex, newRowIndex);
     },
+    //dateとrowのindexを指定して、そのrowのtimeの整合性を取る。
     setSameTimeAsBelow(dateIndex, rowIndex) {
       //1つ下にrowがあるとき、そのtimeにする。
       if (rowIndex < this.timeTable[dateIndex].rows.length - 1) {
