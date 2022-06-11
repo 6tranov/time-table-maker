@@ -256,49 +256,6 @@ export default {
     draggingInfo() {
       return this.dragging ? "under drag" : "";
     },
-    getNull2() {
-      //ボツ
-      return null;
-      //var result = "";
-
-      //return result;
-    },
-    getNull() {
-      //ボツ
-      return null;
-      /**
-       * jの判定について共通化できる部分があるのでコーディングの際に修正をする。
-       * result=[]
-       * for 日付(i)
-       *    for タスク(j)
-       *        if 同じ日付の中で次のタスクがある場合
-       *            (pushする要素は1つのみ。)
-       *            const day = (j==0) ? days[i] : ""
-       *            result.push({day:day,time:times[j]~times[j+1],action:actions[j]})
-       *        if 次の日付が無い場合(1つ目のif文を満たしていないので、同じ日付の中で一番最後のタスク、という前提がある。)
-       *            (pushする要素は1つのみ。)
-       *            const day = (j==0) ? days[i] : ""
-       *            result.push({day:day,time:times[j]~lastTime,action:actions[j]})
-       *        if  次の日付が有り、かつその要素が0個の場合(1つ目のif文を満たしていないので、同じ日付の中で一番最後のタスク、という前提がある。)
-       *            (pushする要素は1つ以上。)
-       *            const day = (j==0) ? days[i] : ""
-       *            result.push({day:day,time:times[j]~24:00,action:actions[j]})
-       *            for その日付から、次の日付の前日まで(k)
-       *                result.push({day:dayから(k+1)日後,time:00:00~24:00,action:actions[j]})
-       *            if lastTime == "00:00"
-       *                (pushする要素は0個。)
-       *            else
-       *                (pushする要素は1つのみ。)
-       *                result.push({day:days[i+1],time:00:00~lasTime,action:actions[j]})
-       *        (その他の場合)(その日の最後の要素で、次の日付があり、かつその要素が1個以上の場合)
-       *        const day = (j==0) ? days[i] : ""
-       *        result.push({day:day,time:times[j]~24:00,action:actions[j]})
-       *        result.push({days[i+1],time:00:00~days[i].times[0],action:actions[j]})
-       *
-       * 次の日に00:00のみのタスクとlastTimeが00:00だとバグるかもしれない。
-       * あと、前の日付があった場合は、その日の最初の要素でもdays[i]とはならない。これは、j==0のときに、さらにその日の最初の要素が00:00から始まっていればdayをdays[i]にして、それ以外は""とすることで解決する。
-       */
-    },
   },
   methods: {
     add: function () {
