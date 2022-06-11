@@ -46,10 +46,11 @@
               "
             />
             <br />
-            <textarea
+            <input
+              type="text"
               v-model="element.action"
               placeholder="Write your action"
-            ></textarea>
+            />
             <span class="handle-only-this">Drag</span>
           </div>
         </template>
