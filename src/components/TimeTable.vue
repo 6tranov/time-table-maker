@@ -39,7 +39,7 @@
             <input type="time" v-model="element.time" />
             <br />
             <textarea
-              v-model="element.text"
+              v-model="element.action"
               placeholder="Write your action"
             ></textarea>
             <span class="handle-only-this">Drag</span>
@@ -52,6 +52,7 @@
     </div>
 
     <button class="btn btn-secondary" @click="add">Add</button>
+    <button class="btn btn-secondary" @click="copy">Copy</button>
   </div>
 </template>
 
@@ -76,24 +77,23 @@ function getConvertedTimeTable(timeTable, lastTime) {
   //1日以上日付をまたいだ時の処理を考える。
   for (var i = 0; i < timeTable.length; i++) {
     var isAddedDay = false; //dayを書くかどうかのフラグ
-
     //rowに無いactionをresultに追加するための処理
     //前の日付が存在する場合
     if (0 < i) {
       //丸一日以上日付をまたいだ場合
       //timeTableにある、ひとつ前の日付
       var formerDate = new Date(
-        timeTable[i - 1].day.substr(0, 4),
-        timeTable[i - 1].day.substr(5, 2),
-        timeTable[i - 1].day.substr(8, 2)
+        timeTable[i - 1].date.substr(0, 4),
+        timeTable[i - 1].date.substr(5, 2),
+        timeTable[i - 1].date.substr(8, 2)
       );
       //それを1日後にする。
       formerDate.setDate(formerDate.getDate() + 1);
       //for文で回している最中の日付
       var thisDate = new Date(
-        timeTable[i].day.substr(0, 4),
-        timeTable[i].day.substr(5, 2),
-        timeTable[i].day.substr(8, 2)
+        timeTable[i].date.substr(0, 4),
+        timeTable[i].date.substr(5, 2),
+        timeTable[i].date.substr(8, 2)
       );
       //for文で回している最中の日付の前日まで
       while (formerDate < thisDate) {
@@ -103,7 +103,7 @@ function getConvertedTimeTable(timeTable, lastTime) {
         const month = ("00" + formerDate.getMonth()).slice(-2);
         const date = ("00" + formerDate.getDate()).slice(-2);
         result.push({
-          day: `${year}-${month}-${date}`,
+          date: `${year}-${month}-${date}`,
           time: "00:00~24:00",
           action:
             timeTable[i - 1].rows[timeTable[i - 1].rows.length - 1].action,
@@ -119,7 +119,7 @@ function getConvertedTimeTable(timeTable, lastTime) {
       ) {
         //timeを、00:00~最初のtimeにする。
         result.push({
-          day: timeTable[i].day,
+          date: timeTable[i].date,
           time: `00:00~${timeTable[i].rows[0].time}`,
           action:
             timeTable[i - 1].rows[timeTable[i - 1].rows.length - 1].action,
@@ -131,7 +131,7 @@ function getConvertedTimeTable(timeTable, lastTime) {
       if (timeTable[i].rows.length == 0 && lastTime !== "00:00") {
         //timeを、00:00~lastTimeにする。
         result.push({
-          day: timeTable[i].day,
+          date: timeTable[i].date,
           time: `00:00~${lastTime}`,
           action:
             timeTable[i - 1].rows[timeTable[i - 1].rows.length - 1].action,
@@ -143,9 +143,9 @@ function getConvertedTimeTable(timeTable, lastTime) {
     //rowに存在するactionをresultに追加するための処理
     for (var j = 0; j < timeTable[i].rows.length; j++) {
       //日付を記述するかどうかを判断する処理
-      var day = "";
+      var date = "";
       if (!isAddedDay) {
-        day = timeTable[i].day;
+        date = timeTable[i].date;
         isAddedDay = true;
       }
 
@@ -153,7 +153,7 @@ function getConvertedTimeTable(timeTable, lastTime) {
       if (j < timeTable[i].rows.length - 1) {
         //今のrowの時間~次のrowの時間を、timeとする。
         result.push({
-          day: day,
+          date: date,
           time: `${timeTable[i].rows[j].time}~${timeTable[i].rows[j + 1].time}`,
           action: timeTable[i].rows[j].action,
         });
@@ -164,7 +164,7 @@ function getConvertedTimeTable(timeTable, lastTime) {
       if (i < timeTable.length - 1) {
         //今のrowの時間~24:00を、timeとする。
         result.push({
-          day: day,
+          date: date,
           time: `${timeTable[i].rows[j].time}~24:00`,
           action: timeTable[i].rows[j].action,
         });
@@ -173,13 +173,12 @@ function getConvertedTimeTable(timeTable, lastTime) {
 
       //最後の日付で、最後のrowのとき
       result.push({
-        day: day,
+        date: date,
         time: `${timeTable[i].rows[j].time}~${lastTime}`,
         action: timeTable[i].rows[j].action,
       });
     }
   }
-
   return result;
 }
 
@@ -188,7 +187,7 @@ function getMDTimeTable(convertedTimeTable) {
   result += "|日付|時間|行動|\n";
   result += "|:-:|:-:|:-:|\n";
   for (const row of convertedTimeTable) {
-    result += `|${row.day}|${row.time}|${row.action}|\n`;
+    result += `|${row.date}|${row.time}|${row.action}|\n`;
   }
   return result;
 }
@@ -213,17 +212,17 @@ export default {
             {
               id: 0,
               time: "09:15",
-              text: "email checkig",
+              action: "email checkig",
             },
             {
               id: 1,
               time: "10:00",
-              text: "coding",
+              action: "coding",
             },
             {
               id: 2,
               time: "12:00",
-              text: "lunch",
+              action: "lunch",
             },
           ],
         },
@@ -234,17 +233,17 @@ export default {
             {
               id: 3,
               time: "09:15",
-              text: "email checkig",
+              action: "email checkig",
             },
             {
               id: 4,
               time: "10:00",
-              text: "coding",
+              action: "coding",
             },
             {
               id: 5,
               time: "12:00",
-              text: "lunch",
+              action: "lunch",
             },
           ],
         },
@@ -303,7 +302,7 @@ export default {
   },
   methods: {
     add: function () {
-      const newRow = { id: this.lastID + 1, time: this.lastTime, text: "" };
+      const newRow = { id: this.lastID + 1, time: this.lastTime, action: "" };
       this.timeTable.push(newRow);
     },
     checkMove: function (e) {
@@ -327,6 +326,12 @@ export default {
     },
     clearEmptyListOfDeleteArea: function () {
       this.emptyListOfDeleteArea = [];
+    },
+    copy: function () {
+      const converted = getConvertedTimeTable(this.timeTable, this.lastTime);
+      const md = getMDTimeTable(converted);
+      navigator.clipboard.writeText(md);
+      alert("コピーしました");
     },
   },
 };
