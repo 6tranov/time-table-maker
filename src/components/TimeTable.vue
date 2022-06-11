@@ -44,12 +44,18 @@
                   getDateIndexAndRowIndexPairFromRowID(element.id)
                 )
               "
+              @keydown.enter="focusNextAction(element.id)"
+              :ref="'time' + element.id"
             />
             <br />
             <input
               type="text"
               v-model="element.action"
               placeholder="Write your action"
+              @keydown.enter="
+                focusNextTime(getDateIndexAndRowIndexPairFromRowID(element.id))
+              "
+              :ref="'action' + element.id"
             />
             <span class="handle-only-this">Drag</span>
           </div>
@@ -57,7 +63,7 @@
       </draggable>
     </div>
     <div>
-      <input type="time" v-model="lastTime" />
+      <input type="time" v-model="lastTime" ref="lastTime" />
     </div>
 
     <button class="btn btn-secondary" @click="add">Add</button>
@@ -201,6 +207,13 @@ function getMDTimeTable(convertedTimeTable) {
   return result;
 }
 
+function timeRef(timeID) {
+  return `time${timeID}`;
+}
+function actionRef(actionID) {
+  return `action${actionID}`;
+}
+
 let id = 1;
 export default {
   name: "TimeTable",
@@ -258,6 +271,7 @@ export default {
         },
       ],
       lastTime: "18:45",
+      lastTimeRef: "lastTime",
       emptyListOfDeleteArea: [],
       oldTime: "00:00",
     };
@@ -387,7 +401,11 @@ export default {
       if (!this.isCorrectTimeOrder(dateIndex, rowIndex)) {
         //timeを、編集前のtimeに設定する。
         this.timeTable[dateIndex].rows[rowIndex].time = this.oldTime;
+        //順序が正しくないことを示すアラートを表示する。
         alert("wrong time order.");
+        //
+        const rowID = this.timeTable[dateIndex].rows[rowIndex].id;
+        this.$refs[`time${rowID}`][0].focus();
       }
     },
     isCorrectTimeOrder(dateIndex, rowIndex) {
@@ -429,6 +447,62 @@ export default {
         isASameOrBeforeB(formerTime, thisTime) &&
         isASameOrBeforeB(thisTime, laterTime)
       );
+    },
+    focusNextAction(timeID) {
+      /**
+       * timeの次にあるactionはidが同じなので、
+       * 単純にaction${ID}と指定すればよい。
+       * [0]としているのは、原因はよくわからないが
+       * this.$refs[ref]が配列として扱われており、
+       * その1つ目の要素を取得すればいいかららしい。
+       */
+      this.$refs[`action${timeID}`][0].focus();
+    },
+    focusNextTime(dateIndexAndRowIndexPair) {
+      const dateIndex = dateIndexAndRowIndexPair[0];
+      const rowIndex = dateIndexAndRowIndexPair[1];
+      //dateIndexとrowIndexから、次のtimeのrefを特定する。
+      var nextTimeRef = null;
+
+      //次のrowがある場合
+      if (rowIndex < this.timeTable[dateIndex].rows.length - 1) {
+        //次の要素のidから、refがわかる。
+        const id = this.timeTable[dateIndex].rows[rowIndex + 1].id;
+        nextTimeRef = timeRef(id);
+
+        //(最後のrowという前提のもと)次の日付がある場合
+      } else if (dateIndex < this.timeTable.length - 1) {
+        //次の日付が空の場合
+        if (this.timeTable[dateIndex + 1].rows.length === 0) {
+          //lastTimeをrefにする。
+          nextTimeRef = this.lastTimeRef;
+
+          //次の日付が空ではない場合
+        } else {
+          //次の日の最初のrowをrefにする。
+          const id = this.timeTable[dateIndex + 1].rows[0].id;
+          nextTimeRef = timeRef(id);
+        }
+        //(最後のrowという前提のもと)次の日付が無い場合
+      } else {
+        //lastTimeをrefにする。
+        nextTimeRef = this.lastTimeRef;
+      }
+
+      //refにfocusを当てる。
+      /**
+       * 原因は良くわからないが、
+       * lastTimeかどうかで、
+       * [0]をつけるかどうかが決まる。
+       */
+      //lastTimeをfocusするとき
+      if (nextTimeRef === this.lastTimeRef) {
+        this.$refs[nextTimeRef].focus();
+
+        //lastTime以外をfocusするとき
+      } else {
+        this.$refs[nextTimeRef][0].focus();
+      }
     },
   },
 };
