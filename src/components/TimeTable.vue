@@ -23,7 +23,7 @@
         :list="day.rows"
         :disabled="!enabled"
         item-key="id"
-        @change="modifyTimeWhenMoved($event, day.id)"
+        @change="modifyTimeWhenMoved($event, getDateIndexFromDateID(day.id))"
         @start="enableDeleteArea"
         @end="
           disableDeleteArea();
@@ -35,7 +35,16 @@
       >
         <template #item="{ element }">
           <div>
-            <input type="time" v-model="element.time" />
+            <input
+              type="time"
+              v-model="element.time"
+              @focus="setOldTime($event.target.value)"
+              @change="
+                modifyTimeWhenChanged(
+                  getDateIndexAndRowIndexPairFromRowID(element.id)
+                )
+              "
+            />
             <br />
             <textarea
               v-model="element.action"
@@ -249,6 +258,7 @@ export default {
       ],
       lastTime: "18:45",
       emptyListOfDeleteArea: [],
+      oldTime: "00:00",
     };
   },
   computed: {
@@ -257,6 +267,31 @@ export default {
     },
   },
   methods: {
+    //dateIDから、dateIndexを取得する。
+    getDateIndexFromDateID(dateID) {
+      for (var index = 0; index < this.timeTable.length; index++) {
+        if (this.timeTable[index].id === dateID) {
+          return index;
+        }
+      }
+      return null;
+    },
+    //rowのidから、(dateIndex,rowIndex)を取得する。
+    getDateIndexAndRowIndexPairFromRowID(rowID) {
+      for (var dateIndex = 0; dateIndex < this.timeTable.length; dateIndex++) {
+        for (
+          var rowIndex = 0;
+          rowIndex < this.timeTable[dateIndex].rows.length;
+          rowIndex++
+        ) {
+          if (this.timeTable[dateIndex].rows[rowIndex].id === rowID) {
+            return [dateIndex, rowIndex];
+          }
+        }
+      }
+      return null;
+    },
+    //新しいrowを追加する。
     add: function () {
       const newRow = { id: this.lastID + 1, time: this.lastTime, action: "" };
       this.timeTable.push(newRow);
@@ -277,17 +312,19 @@ export default {
     enableDeleteArea: function () {
       document.getElementById("deleteArea").style.backgroundColor = "red";
     },
+    //rowの削除エリアを無効化する。
     disableDeleteArea: function () {
       document.getElementById("deleteArea").style.backgroundColor = "white";
     },
     clearEmptyListOfDeleteArea: function () {
       this.emptyListOfDeleteArea = [];
     },
+    //作成したtimeTableを、マークダウン形式でクリップボードにコピーする。
     copyToClipboard: function () {
       const converted = getConvertedTimeTable(this.timeTable, this.lastTime);
       const md = getMDTimeTable(converted);
       navigator.clipboard.writeText(md);
-      alert("コピーしました");
+      alert("copied.");
     },
     //rowを移動したとき、時間の整合性が取れるようにする。
     modifyTimeWhenMoved(event, dateIndex) {
@@ -337,6 +374,60 @@ export default {
       //それ以外の(新しい日付にドラッグした)とき、00:00にする。
       this.timeTable[dateIndex].rows[rowIndex].time = "00:00";
       return;
+    },
+    setOldTime(oldTime) {
+      this.oldTime = oldTime;
+    },
+    //timeを編集したときに、順序の整合性を取る。
+    modifyTimeWhenChanged(dateIndexAndRowIndexPair) {
+      const dateIndex = dateIndexAndRowIndexPair[0];
+      const rowIndex = dateIndexAndRowIndexPair[1];
+      //誤った順序のとき
+      if (!this.isCorrectTimeOrder(dateIndex, rowIndex)) {
+        //timeを、編集前のtimeに設定する。
+        this.timeTable[dateIndex].rows[rowIndex].time = this.oldTime;
+        alert("wrong time order.");
+      }
+    },
+    isCorrectTimeOrder(dateIndex, rowIndex) {
+      var formerTime = null;
+      var thisTime = this.timeTable[dateIndex].rows[rowIndex].time;
+      var laterTime = null;
+
+      //formerDateの設定
+      //2番目以降のrow
+      if (0 < rowIndex) {
+        //1つ前のtimeをformerDateとして設定する
+        formerTime = this.timeTable[dateIndex].rows[rowIndex - 1].time;
+
+        //最初のrowのとき
+      } else {
+        //00:00に設定する
+        formerTime = "00:00";
+      }
+
+      //laterDateの設定
+      //最後のrowではないとき
+      if (rowIndex < this.timeTable[dateIndex].rows.length - 1) {
+        //次のrowのtimeを設定する
+        laterTime = this.timeTable[dateIndex].rows[rowIndex + 1].time;
+
+        //(最後のrowで)最後の日付のとき
+      } else if (dateIndex === this.timeTable.length - 1) {
+        //lastTimeを設定する
+        laterTime = this.lastTime;
+
+        //(最後のrowで)次の日付があるとき
+      } else {
+        //23:59を設定する
+        laterTime = "23:59";
+      }
+
+      //順序の整合性を確認する。
+      return (
+        isASameOrBeforeB(formerTime, thisTime) &&
+        isASameOrBeforeB(thisTime, laterTime)
+      );
     },
   },
 };
