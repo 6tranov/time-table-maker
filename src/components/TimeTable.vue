@@ -73,7 +73,7 @@
       <input type="time" v-model="lastTime" ref="lastTime" />
     </div>
 
-    <button class="btn btn-secondary" @click="add">Add</button>
+    <button class="btn btn-secondary" @click="pushRow">スケジュールを追加</button>
     <button class="btn btn-secondary" @click="copyToClipboard">Copy</button>
   </div>
 </template>
@@ -314,8 +314,8 @@ export default {
       }
       return null;
     },
-    //新しいrowを追加する。
-    add: function () {
+    //新しいrowを、最後の日付の最後のrowとして追加する。
+    addNewRowBehindLastDateLastRow: function () {
       const newRow = { id: this.lastID + 1, time: this.lastTime, action: "" };
       this.timeTable.push(newRow);
     },
@@ -519,14 +519,15 @@ export default {
         rowIndex === this.timeTable[dateIndex].rows.length - 1
       ) {
         //その後ろにrowを追加する。
-        this.pushRow(dateIndex, this.lastTime, "");
+        this.pushRow();
       }
     },
-    pushRow(dateIndex, time, action) {
-      this.timeTable[dateIndex].rows.push({
+    //最後の日付の最後のrowとして、空のrowを追加します。lastRowIDはインクリメントされます。
+    pushRow() {
+      this.timeTable[this.timeTable.length - 1].rows.push({
         id: this.lastRowID,
-        time: time,
-        action: action,
+        time: this.lastTime,
+        action: "",
       });
       this.lastRowID++;
     },
