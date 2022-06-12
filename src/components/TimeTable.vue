@@ -53,7 +53,14 @@
               v-model="element.action"
               placeholder="Write your action"
               @keydown.enter="
-                focusNextTime(getDateIndexAndRowIndexPairFromRowID(element.id))
+                createRowWhenLastDateLastRow(
+                  getDateIndexAndRowIndexPairFromRowID(element.id)
+                );
+                this.$nextTick(function () {
+                  focusNextTime(
+                    getDateIndexAndRowIndexPairFromRowID(element.id)
+                  );
+                });
               "
               :ref="'action' + element.id"
             />
@@ -274,6 +281,7 @@ export default {
       lastTimeRef: "lastTime",
       emptyListOfDeleteArea: [],
       oldTime: "00:00",
+      lastRowID: 10, //いずれきちんとした値に変更する。
     };
   },
   computed: {
@@ -463,7 +471,6 @@ export default {
       const rowIndex = dateIndexAndRowIndexPair[1];
       //dateIndexとrowIndexから、次のtimeのrefを特定する。
       var nextTimeRef = null;
-
       //次のrowがある場合
       if (rowIndex < this.timeTable[dateIndex].rows.length - 1) {
         //次の要素のidから、refがわかる。
@@ -488,7 +495,6 @@ export default {
         //lastTimeをrefにする。
         nextTimeRef = this.lastTimeRef;
       }
-
       //refにfocusを当てる。
       /**
        * 原因は良くわからないが、
@@ -503,6 +509,26 @@ export default {
       } else {
         this.$refs[nextTimeRef][0].focus();
       }
+    },
+    createRowWhenLastDateLastRow(dateIndexAndRowIndexPair) {
+      const dateIndex = dateIndexAndRowIndexPair[0];
+      const rowIndex = dateIndexAndRowIndexPair[1];
+      //最後のdateで最後のrowのとき
+      if (
+        dateIndex === this.timeTable.length - 1 &&
+        rowIndex === this.timeTable[dateIndex].rows.length - 1
+      ) {
+        //その後ろにrowを追加する。
+        this.pushRow(dateIndex, this.lastTime, "");
+      }
+    },
+    pushRow(dateIndex, time, action) {
+      this.timeTable[dateIndex].rows.push({
+        id: this.lastRowID,
+        time: time,
+        action: action,
+      });
+      this.lastRowID++;
     },
   },
 };
