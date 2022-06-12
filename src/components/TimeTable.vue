@@ -78,7 +78,7 @@
                     <td style="padding: 0" class="action-text-border">
                       <input
                         type="text"
-                        style="border: none"
+                        style="border: none; text-align: center"
                         v-model="element.action"
                         placeholder="Write your action"
                         @keydown.enter="
