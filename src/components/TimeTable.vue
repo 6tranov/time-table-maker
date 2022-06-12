@@ -73,7 +73,9 @@
       <input type="time" v-model="lastTime" ref="lastTime" />
     </div>
 
-    <button class="btn btn-secondary" @click="pushRow">スケジュールを追加</button>
+    <button class="btn btn-secondary" @click="pushRow">
+      スケジュールを追加
+    </button>
     <button class="btn btn-secondary" @click="copyToClipboard">Copy</button>
   </div>
 </template>
@@ -241,38 +243,7 @@ export default {
             {
               id: 0,
               time: "09:15",
-              action: "email checkig",
-            },
-            {
-              id: 1,
-              time: "10:00",
-              action: "coding",
-            },
-            {
-              id: 2,
-              time: "12:00",
-              action: "lunch",
-            },
-          ],
-        },
-        {
-          id: 1,
-          date: "2023-02-02",
-          rows: [
-            {
-              id: 3,
-              time: "09:15",
-              action: "email checkig",
-            },
-            {
-              id: 4,
-              time: "10:00",
-              action: "coding",
-            },
-            {
-              id: 5,
-              time: "12:00",
-              action: "lunch",
+              action: "",
             },
           ],
         },
@@ -281,7 +252,7 @@ export default {
       lastTimeRef: "lastTime",
       emptyListOfDeleteArea: [],
       oldTime: "00:00",
-      lastRowID: 10, //いずれきちんとした値に変更する。
+      lastRowID: 1, //いずれきちんとした値に変更する。
     };
   },
   computed: {
@@ -524,12 +495,12 @@ export default {
     },
     //最後の日付の最後のrowとして、空のrowを追加します。lastRowIDはインクリメントされます。
     pushRow() {
+      this.lastRowID++;
       this.timeTable[this.timeTable.length - 1].rows.push({
         id: this.lastRowID,
         time: this.lastTime,
         action: "",
       });
-      this.lastRowID++;
     },
   },
 };
