@@ -18,12 +18,12 @@
     </draggable>
 
     <div v-for="day in timeTable" :key="day.id">
-      <div class="card">
+      <div class="card" style="width: fit-content; margin: auto">
         <div class="card-header">
           {{ day.date }}
         </div>
-        <div class="card-body">
-          <table border="1">
+        <div class="list-group list-group-flush">
+          <table>
             <draggable
               :list="day.rows"
               :disabled="!enabled"
@@ -41,10 +41,10 @@
               group="day"
             >
               <template #item="{ element }">
-                <div>
+                <div class="list-group-item" style="padding: 0">
                   <tr>
-                    <td>
-                      <label :for="'time' + element.id">
+                    <td style="padding: 0">
+                      <label :for="'time' + element.id" class="label-item">
                         <input
                           type="time"
                           :id="'time' + element.id"
@@ -61,27 +61,39 @@
                         />
                       </label>
                     </td>
-                    <td rowspan="2">
-                      <span class="handle-only-this handle-item">Drag</span>
+                    <td
+                      rowspan="2"
+                      class="drag-border handle-only-this handle-item"
+                      valign="middle"
+                      style="padding: 0"
+                    >
+                      <div class="hamberger">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                      </div>
                     </td>
                   </tr>
                   <tr>
-                    <input
-                      type="text"
-                      v-model="element.action"
-                      placeholder="Write your action"
-                      @keydown.enter="
-                        createRowWhenLastDateLastRow(
-                          getDateIndexAndRowIndexPairFromRowID(element.id)
-                        );
-                        this.$nextTick(function () {
-                          focusNextTime(
+                    <td style="padding: 0" class="action-text-border">
+                      <input
+                        type="text"
+                        style="border: none"
+                        v-model="element.action"
+                        placeholder="Write your action"
+                        @keydown.enter="
+                          createRowWhenLastDateLastRow(
                             getDateIndexAndRowIndexPairFromRowID(element.id)
                           );
-                        });
-                      "
-                      :ref="'action' + element.id"
-                    />
+                          this.$nextTick(function () {
+                            focusNextTime(
+                              getDateIndexAndRowIndexPairFromRowID(element.id)
+                            );
+                          });
+                        "
+                        :ref="'action' + element.id"
+                      />
+                    </td>
                   </tr>
                 </div>
               </template>
@@ -537,4 +549,62 @@ export default {
 </script>
 
 <style>
+/* rowをドラッグするハンバーガーメニューの左側に表示される縦線のスタイル */
+.drag-border {
+  border: 1px solid lightgray;
+  border-top-style: none;
+  border-bottom-style: none;
+  border-right-style: none;
+}
+
+/* actionを記入するinput textの上に表示される横線のスタイル */
+.action-text-border {
+  border: 1px solid hsl(0, 0%, 90%);
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+}
+
+/* ハンバーガーメニューのためのスタイル */
+.hamberger {
+  position: relative;
+  height: 20px;
+  width: 28px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+.hamberger div {
+  position: absolute;
+  left: 0;
+  height: 2px;
+  width: 28px;
+  background-color: #444;
+  border-radius: 2px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+.hamberger div:nth-of-type(1) {
+  bottom: 20px;
+}
+.hamberger div:nth-of-type(2) {
+  bottom: 10px;
+}
+.hamberger div:nth-of-type(3) {
+  bottom: 0;
+}
+
+/* input timeのスタイル */
+.time {
+  border: none;
+}
+
+/* input timeの当たり判定を横に広げるためにlabelを使用している。そのためのスタイル。 */
+.label-item {
+  display: block;
+  float: left;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  text-align: center;
+}
 </style>
