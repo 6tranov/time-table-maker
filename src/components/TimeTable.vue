@@ -23,57 +23,70 @@
           {{ day.date }}
         </div>
         <div class="card-body">
-          <draggable
-            :list="day.rows"
-            :disabled="!enabled"
-            item-key="id"
-            @change="
-              modifyTimeWhenMoved($event, getDateIndexFromDateID(day.id))
-            "
-            @start="enableDeleteArea"
-            @end="
-              disableDeleteArea();
-              clearEmptyListOfDeleteArea();
-            "
-            handle=".handle-only-this"
-            animation="350"
-            group="day"
-          >
-            <template #item="{ element }">
-              <div>
-                <input
-                  type="time"
-                  v-model="element.time"
-                  @focus="setOldTime($event.target.value)"
-                  @blur="
-                    modifyTimeWhenChanged(
-                      getDateIndexAndRowIndexPairFromRowID(element.id)
-                    )
-                  "
-                  @keydown.enter="focusNextAction(element.id)"
-                  :ref="'time' + element.id"
-                />
-                <br />
-                <input
-                  type="text"
-                  v-model="element.action"
-                  placeholder="Write your action"
-                  @keydown.enter="
-                    createRowWhenLastDateLastRow(
-                      getDateIndexAndRowIndexPairFromRowID(element.id)
-                    );
-                    this.$nextTick(function () {
-                      focusNextTime(
-                        getDateIndexAndRowIndexPairFromRowID(element.id)
-                      );
-                    });
-                  "
-                  :ref="'action' + element.id"
-                />
-                <span class="handle-only-this">Drag</span>
-              </div>
-            </template>
-          </draggable>
+          <table border="1">
+            <draggable
+              :list="day.rows"
+              :disabled="!enabled"
+              item-key="id"
+              @change="
+                modifyTimeWhenMoved($event, getDateIndexFromDateID(day.id))
+              "
+              @start="enableDeleteArea"
+              @end="
+                disableDeleteArea();
+                clearEmptyListOfDeleteArea();
+              "
+              handle=".handle-only-this"
+              animation="350"
+              group="day"
+            >
+              <template #item="{ element }">
+                <div>
+                  <tr>
+                    <td>
+                      <label :for="'time' + element.id">
+                        <input
+                          type="time"
+                          :id="'time' + element.id"
+                          class="time"
+                          v-model="element.time"
+                          @focus="setOldTime($event.target.value)"
+                          @blur="
+                            modifyTimeWhenChanged(
+                              getDateIndexAndRowIndexPairFromRowID(element.id)
+                            )
+                          "
+                          @keydown.enter="focusNextAction(element.id)"
+                          :ref="'time' + element.id"
+                        />
+                      </label>
+                    </td>
+                    <td rowspan="2">
+                      <span class="handle-only-this handle-item">Drag</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <input
+                      type="text"
+                      v-model="element.action"
+                      placeholder="Write your action"
+                      @keydown.enter="
+                        createRowWhenLastDateLastRow(
+                          getDateIndexAndRowIndexPairFromRowID(element.id)
+                        );
+                        this.$nextTick(function () {
+                          focusNextTime(
+                            getDateIndexAndRowIndexPairFromRowID(element.id)
+                          );
+                        });
+                      "
+                      :ref="'action' + element.id"
+                    />
+                  </tr>
+                </div>
+              </template>
+            </draggable>
+          </table>
         </div>
       </div>
     </div>
@@ -265,11 +278,11 @@ export default {
           ],
         },
       ],
-      lastTime: "18:45",
+      lastTime: "17:45",
       lastTimeRef: "lastTime",
       emptyListOfDeleteArea: [],
       oldTime: "00:00",
-      lastRowID: 1, //いずれきちんとした値に変更する。
+      lastRowID: 0, //いずれきちんとした値に変更する。
     };
   },
   computed: {
@@ -522,3 +535,6 @@ export default {
   },
 };
 </script>
+
+<style>
+</style>
