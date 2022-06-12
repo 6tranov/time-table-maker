@@ -7,8 +7,6 @@
 import { defineComponent } from "vue";
 import TimeTable from "./components/TimeTable.vue";
 
-import BootstrapTest from "./components/BootstrapTest.vue";
-
 export default defineComponent({
   name: "App",
   components: {

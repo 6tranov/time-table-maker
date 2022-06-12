@@ -18,56 +18,64 @@
     </draggable>
 
     <div v-for="day in timeTable" :key="day.id">
-      {{ day.date }}
-      <draggable
-        :list="day.rows"
-        :disabled="!enabled"
-        item-key="id"
-        @change="modifyTimeWhenMoved($event, getDateIndexFromDateID(day.id))"
-        @start="enableDeleteArea"
-        @end="
-          disableDeleteArea();
-          clearEmptyListOfDeleteArea();
-        "
-        handle=".handle-only-this"
-        animation="350"
-        group="day"
-      >
-        <template #item="{ element }">
-          <div>
-            <input
-              type="time"
-              v-model="element.time"
-              @focus="setOldTime($event.target.value)"
-              @blur="
-                modifyTimeWhenChanged(
-                  getDateIndexAndRowIndexPairFromRowID(element.id)
-                )
-              "
-              @keydown.enter="focusNextAction(element.id)"
-              :ref="'time' + element.id"
-            />
-            <br />
-            <input
-              type="text"
-              v-model="element.action"
-              placeholder="Write your action"
-              @keydown.enter="
-                createRowWhenLastDateLastRow(
-                  getDateIndexAndRowIndexPairFromRowID(element.id)
-                );
-                this.$nextTick(function () {
-                  focusNextTime(
-                    getDateIndexAndRowIndexPairFromRowID(element.id)
-                  );
-                });
-              "
-              :ref="'action' + element.id"
-            />
-            <span class="handle-only-this">Drag</span>
-          </div>
-        </template>
-      </draggable>
+      <div class="card">
+        <div class="card-header">
+          {{ day.date }}
+        </div>
+        <div class="card-body">
+          <draggable
+            :list="day.rows"
+            :disabled="!enabled"
+            item-key="id"
+            @change="
+              modifyTimeWhenMoved($event, getDateIndexFromDateID(day.id))
+            "
+            @start="enableDeleteArea"
+            @end="
+              disableDeleteArea();
+              clearEmptyListOfDeleteArea();
+            "
+            handle=".handle-only-this"
+            animation="350"
+            group="day"
+          >
+            <template #item="{ element }">
+              <div>
+                <input
+                  type="time"
+                  v-model="element.time"
+                  @focus="setOldTime($event.target.value)"
+                  @blur="
+                    modifyTimeWhenChanged(
+                      getDateIndexAndRowIndexPairFromRowID(element.id)
+                    )
+                  "
+                  @keydown.enter="focusNextAction(element.id)"
+                  :ref="'time' + element.id"
+                />
+                <br />
+                <input
+                  type="text"
+                  v-model="element.action"
+                  placeholder="Write your action"
+                  @keydown.enter="
+                    createRowWhenLastDateLastRow(
+                      getDateIndexAndRowIndexPairFromRowID(element.id)
+                    );
+                    this.$nextTick(function () {
+                      focusNextTime(
+                        getDateIndexAndRowIndexPairFromRowID(element.id)
+                      );
+                    });
+                  "
+                  :ref="'action' + element.id"
+                />
+                <span class="handle-only-this">Drag</span>
+              </div>
+            </template>
+          </draggable>
+        </div>
+      </div>
     </div>
     <div>
       <input type="time" v-model="lastTime" ref="lastTime" />
@@ -94,6 +102,15 @@ function isASameOrBeforeB(a, b) {
   const minutesB = Number(b.substr(3, 2));
   if (minutesA <= minutesB) return true;
   return false;
+}
+
+//YYYY-MM-DDの形式で今日の日付を返します。
+function getDate() {
+  const dateInstance = new Date();
+  const year = ("0000" + dateInstance.getFullYear()).slice(-4);
+  const month = ("00" + dateInstance.getMonth()).slice(-2);
+  const date = ("00" + dateInstance.getDate()).slice(-2);
+  return `${year}-${month}-${date}`;
 }
 
 function getConvertedTimeTable(timeTable, lastTime) {
@@ -238,7 +255,7 @@ export default {
       timeTable: [
         {
           id: 0,
-          date: "2023-02-01",
+          date: getDate(),
           rows: [
             {
               id: 0,
