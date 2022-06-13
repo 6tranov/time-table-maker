@@ -297,12 +297,33 @@ export default {
       lastRowID: 0, //いずれきちんとした値に変更する。
     };
   },
+  created() {
+    //最初に一度実行される処理
+    this.setDefault();
+  },
   computed: {
     draggingInfo() {
       return this.dragging ? "under drag" : "";
     },
   },
   methods: {
+    setDefault() {
+      this.timeTable = [
+        {
+          id: 0,
+          date: getDate(),
+          rows: [
+            {
+              id: 0,
+              time: "09:15",
+              action: "",
+            },
+          ],
+        },
+      ];
+      this.lastRowID = 0;
+      this.lastTime = "17:45";
+    },
     //dateIDから、dateIndexを取得する。
     getDateIndexFromDateID(dateID) {
       for (var index = 0; index < this.timeTable.length; index++) {
