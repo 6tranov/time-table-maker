@@ -144,7 +144,7 @@ function isASameOrBeforeB(a, b) {
 function getDate() {
   const dateInstance = new Date();
   const year = ("0000" + dateInstance.getFullYear()).slice(-4);
-  const month = ("00" + dateInstance.getMonth() + 1).slice(-2);
+  const month = ("00" + (dateInstance.getMonth() + 1)).slice(-2);
   const date = ("00" + dateInstance.getDate()).slice(-2);
   return `${year}-${month}-${date}`;
 }
