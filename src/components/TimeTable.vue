@@ -103,7 +103,14 @@
       </div>
     </div>
     <div>
-      <input type="time" v-model="lastTime" ref="lastTime" />
+      <input
+        type="time"
+        v-model="lastTime"
+        ref="lastTime"
+        @focus="setOldLastTime($event.target.value)"
+        @blur="lastTimeValidation()"
+        @keydown.enter="$refs['lastTime'].blur()"
+      />
     </div>
 
     <button class="btn btn-secondary" @click="pushRow">
@@ -299,6 +306,7 @@ export default {
       emptyListOfDeleteArea: [],
       oldTime: "00:00",
       lastRowID: 0, //いずれきちんとした値に変更する。
+      oldLastTime: "23:59",
     };
   },
   created() {
@@ -326,6 +334,38 @@ export default {
     },
   },
   methods: {
+    lastTimeValidation() {
+      //rowが0個のとき
+      if (this.timeTable.length == 1 && this.timeTable[0].rows.length == 0) {
+        //何もしない
+        return;
+      }
+
+      //一番最後のdateIndexとrowIndexを取得する。
+      var dateIndex = null;
+      var rowIndex = null;
+
+      //(rowが1つ以上という前提のもと)最後の日付にrowがないとき
+      if (this.timeTable[this.timeTable.length - 1].rows.length == 0) {
+        //さらにその前の日付があるはずなので、そのdateIndexと、その日付の最後のrowIndexを取得する。
+        alert(0);
+        dateIndex = this.timeTable.length - 2;
+        rowIndex = this.timeTable[dateIndex].rows - 1;
+        //(rowが1つ以上という前提のもと)最後の日付にrowがあるとき
+      } else {
+        //最後の日付のdateIndexと、その日付の最後のrowIndexを取得する。
+        dateIndex = this.timeTable.length - 1;
+        rowIndex = this.timeTable[dateIndex].rows.length - 1;
+      }
+      if (!this.isCorrectTimeOrder(dateIndex, rowIndex)) {
+        //lastTimeを、編集前のtimeに設定する。
+        this.lastTime = this.oldLastTime;
+        //順序が正しくないことを示すアラートを表示する。
+        alert("wrong time order.");
+        //lastTimeにフォーカスを当てる。
+        this.$refs["lastTime"].focus();
+      }
+    },
     reset() {
       //リセットの確認画面を表示する。
       if (window.confirm("リセットします。よろしいですか？")) {
@@ -462,6 +502,9 @@ export default {
     },
     setOldTime(oldTime) {
       this.oldTime = oldTime;
+    },
+    setOldLastTime(oldLastTime) {
+      this.oldLastTime = oldLastTime;
     },
     //timeを編集したときに、順序の整合性を取る。
     modifyTimeWhenChanged(dateIndexAndRowIndexPair) {
