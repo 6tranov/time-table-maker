@@ -110,6 +110,7 @@
       スケジュールを追加
     </button>
     <button class="btn btn-secondary" @click="copyToClipboard">Copy</button>
+    <button class="btn btn-danger" @click="reset">リセット</button>
   </div>
 </template>
 
@@ -325,6 +326,15 @@ export default {
     },
   },
   methods: {
+    reset() {
+      //リセットの確認画面を表示する。
+      if (window.confirm("リセットします。よろしいですか？")) {
+        //デフォルトに設定する。
+        this.setDefault();
+      } else {
+        //何もしない
+      }
+    },
     setDefault() {
       this.timeTable = [
         {
