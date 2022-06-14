@@ -1,5 +1,6 @@
 <template>
   <TimeTable />
+  <BootstrapText />
 </template>
 
 <script lang="ts">
