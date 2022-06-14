@@ -117,6 +117,9 @@
 /* eslint-disable no-console */
 import draggable from "vuedraggable";
 
+//cookieを使用するためのimport
+import VueCookies from "vue-cookies";
+
 function isASameOrBeforeB(a, b) {
   const hourA = Number(a.substr(0, 2));
   const hourB = Number(b.substr(0, 2));
@@ -299,7 +302,22 @@ export default {
   },
   created() {
     //最初に一度実行される処理
-    this.setDefault();
+    //timeTableなどがcookieに登録されていない場合
+    if (
+      VueCookies.get("timeTable") === null ||
+      VueCookies.get("lastTime") === null ||
+      VueCookies.get("lastRowID") === null
+    ) {
+      //デフォルトで初期化する
+      this.setDefault();
+
+      //はじめてこのサイトにアクセスする場合
+    } else {
+      //cookieに保存された内容を適用する。
+      this.timeTable = JSON.parse(VueCookies.get("timeTable"));
+      this.lastTime = JSON.parse(VueCookies.get("lastTime"));
+      this.lastRowID = JSON.parse(VueCookies.get("lastRowID"));
+    }
   },
   computed: {
     draggingInfo() {
@@ -564,6 +582,20 @@ export default {
         time: this.lastTime,
         action: "",
       });
+    },
+  },
+  watch: {
+    timeTable: {
+      handler: function () {
+        VueCookies.remove("timeTable");
+        VueCookies.remove("lastTime");
+        VueCookies.remove("lastRowID");
+
+        VueCookies.set("timeTable", JSON.stringify(this.timeTable));
+        VueCookies.set("lastTime", JSON.stringify(this.lastTime));
+        VueCookies.set("lastRowID", JSON.stringify(this.lastRowID));
+      },
+      deep: true,
     },
   },
 };
